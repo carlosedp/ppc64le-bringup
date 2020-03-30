@@ -10,6 +10,7 @@ The objective of this repository is to track the progress and pre-requisites to 
 * [Grafana](#grafana)
 * [Traefik Image](#traefik-image)
 * [Drone-CI CLI](#drone-ci-cli)
+* [Kubernetes Dashboard](#kubernetes-dashboard)
 
 ---------------------------------------------------
 
@@ -105,6 +106,14 @@ Add `ppc64le` images to CI:
 
 Command Line Tools for Drone CI. <https://github.com/drone/drone-cli>
 
-* [x] Add binaries for ppc64le - PR <https://github.com/drone/drone-cli/pull/170>
+* [x] Add binaries for ppc64le - [PR#170](https://github.com/drone/drone-cli/pull/170)
+
+---------------------------------------------------
+
+## Kubernetes Dashboard
+
+The new Kubernetes dashboard is composed of the Dashboard front-end and the [metrics-scraper](https://github.com/kubernetes-sigs/dashboard-metrics-scraper). The Dashboard is already built for ppc64le but the scraper needs build support.
+
+* [ ] Add build support for ppc64le - [PR#29](https://github.com/kubernetes-sigs/dashboard-metrics-scraper/pull/29)
 
 ---------------------------------------------------

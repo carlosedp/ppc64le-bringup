@@ -30,6 +30,73 @@ sudo kubectl get nodes
 
 This will allow all users to access the cluster thru the cluster config file. For more info, check the [official docs](https://github.com/rancher/k3s/#documentation).
 
+## Kubernetes Dashboard
+
+You can also deploy the new Kubernetes Dashboard on your PPC64le K3s cluster.
+
+![alt](https://raw.githubusercontent.com/kubernetes/dashboard/master/docs/images/overview.png)
+
+Brief instructions below or check the [official docs](https://github.com/kubernetes/dashboard).
+
+```sh
+# Deploy Dashboard.
+# Replace image until it's generated for ppc64le. Check main tracker readme.
+curl -Ls https://github.com/kubernetes/dashboard/raw/master/aio/deploy/alternative.yaml |sed -e s/"kubernetesui\/metrics-scraper:v1.0.4"/"carlosedp\/metrics-scraper"/ | kubectl apply -f -
+
+# Create RBAC
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+EOF
+
+# Create Ingress Route
+DOMAIN=`ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}'`.nip.io
+cat <<EOF | kubectl apply -f -
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: kubernetes-dashboard
+    namespace: kubernetes-dashboard
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: dashboard.$DOMAIN
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: kubernetes-dashboard
+            servicePort: 80
+EOF
+
+# Get Token for login
+kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
+```
+
+Copy the Token and paste on Dashboard login screen.
+
+Get your domain with `echo $DOMAIN` and then
+open the Dashboard URL on https://dashboard.yourdomain-name.
+
+
 ## Deploy test app
 
 This will deploy the NGINX web server into the cluster and expose it on an ingress route on your node.
