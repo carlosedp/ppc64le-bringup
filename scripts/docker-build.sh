@@ -26,6 +26,7 @@ make BUILDTAGS="no_btrfs"
 
 # For debs
 DESTDIR=$DOCKERDIST/debs/usr/local make install
+git checkout master
 popd
 popd
 
@@ -280,5 +281,11 @@ EOF
 
 sudo chmod +x $DOCKERDIST/debs/DEBIAN/postinst
 
-cd $DOCKERDIST
+pushd $DOCKERDIST
 dpkg-deb -b debs "docker-"$DOCKERVERSION"_ppc64el.deb"
+pushd debs
+tar -cf "docker-"$DOCKERVERSION"_ppc64el.tar" --exclude DEBIAN .
+gzip "docker-"$DOCKERVERSION"_ppc64el.tar"
+popd
+mv debs/"docker-"$DOCKERVERSION"_ppc64el.tar.gz" .
+popd
