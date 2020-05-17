@@ -2,6 +2,10 @@
 
 The objective of this repository is to track the progress and pre-requisites to bring new applications and projects to PPC64le architecture.
 
+If you want to start developing and run a PPC64le Virtual Machine, I've uploaded both Debian and Ubuntu versions that can be downloaded from the [releases](https://github.com/carlosedp/ppc64-bringup/releases/tag/v1.0) section.
+
+There is also a [guide](https://github.com/carlosedp/ppc64-bringup/tree/master/QemuVM) if you want to build the VMs from scratch.
+
 ## Contents  <!-- omit in toc -->
 
 * [Docker Community Edition](#docker-community-edition)
@@ -11,6 +15,7 @@ The objective of this repository is to track the progress and pre-requisites to 
 * [Traefik Image](#traefik-image)
 * [Drone-CI CLI](#drone-ci-cli)
 * [Kubernetes Dashboard](#kubernetes-dashboard)
+* [Minio](#minio)
 
 ---------------------------------------------------
 
@@ -32,7 +37,8 @@ sudo apt install ./docker-master-dev_ppc64el.deb
 sudo tar vxf docker-master-dev_ppc64el.tar.gz -C /
 ```
 
-* [ ] Add Debian packages for ppc64el
+* [ ] Add Debian packages for ppc64el to [docker-ce-packaging](https://github.com/docker/docker-ce-packaging) repo -
+* [ ] Add ppc64le to containerd-packaging repo - [Issue#164](https://github.com/docker/containerd-packaging/issues/164)
 
 ---------------------------------------------------
 
@@ -49,13 +55,13 @@ The [guide](k3s/Readme.md#building-from-source) also provides the process to bui
 **Dependencies:**
 
 * [ ] Add arch to [dqlite-builder](https://github.com/rancher/dqlite-build) - [PR#12](https://github.com/rancher/dqlite-build/pull/12)
-* [ ] Add arch to [k3s-root](https://github.com/rancher/k3s-root) - [PR#7](https://github.com/rancher/k3s-root/pull/7)
+* [x] Add arch to [k3s-root](https://github.com/rancher/k3s-root) - [PR#7](https://github.com/rancher/k3s-root/pull/7)
 * [ ] Fix dapper download on K3s Makefile
 * [ ] Add klipper-helm image support or overrire it on Go module.
 
 **Required `ppc64le` images:**
 
-* [ ] `rancher/coredns-coredns:1.6.3` - []()
+* [x] `rancher/coredns-coredns:1.6.3`
 * [ ] `rancher/klipper-helm:v0.2.3` - [PR#13](https://github.com/rancher/klipper-helm/pull/13)
 * [ ] `rancher/klipper-lb:v0.1.2` - []()
 * [ ] `rancher/library-traefik:1.7.19` - []()
@@ -86,7 +92,7 @@ Add `ppc64le` images to CI:
 * [x] `node-exporter` - Already supports `ppc64le`
 * [x] `snmp-exporter` - [PR#494](https://github.com/prometheus/snmp_exporter/pull/494)
 * [x] `blackbox-exporter` - [PR#587](https://github.com/prometheus/blackbox_exporter/pull/587)
-* [ ] `pushgateway` - [PR#339](https://github.com/prometheus/pushgateway/pull/339)
+* [x] `pushgateway` - [PR#339](https://github.com/prometheus/pushgateway/pull/339)
 
 ---------------------------------------------------
 
@@ -114,6 +120,19 @@ Command Line Tools for Drone CI. <https://github.com/drone/drone-cli>
 
 The new Kubernetes dashboard is composed of the Dashboard front-end and the [metrics-scraper](https://github.com/kubernetes-sigs/dashboard-metrics-scraper). The Dashboard is already built for ppc64le but the scraper needs build support.
 
-* [ ] Add build support for ppc64le - [PR#29](https://github.com/kubernetes-sigs/dashboard-metrics-scraper/pull/29)
+* [x] Add build support for ppc64le - [PR#29](https://github.com/kubernetes-sigs/dashboard-metrics-scraper/pull/29)
+
+---------------------------------------------------
+
+## Minio
+
+Minio is a high-performance object storage.
+
+The multiarch images for Minio and Minio client can be pulled from my DockerHub repo:
+
+* [`carlosedp/minio:latest`](https://hub.docker.com/r/carlosedp/minio)
+* [`carlosedp/minio-mc:latest`](https://hub.docker.com/r/carlosedp/minio-mc)
+
+* [ ] Add multiarch images - [Issue#9546](https://github.com/minio/minio/issues/9546)
 
 ---------------------------------------------------
