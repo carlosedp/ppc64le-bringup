@@ -61,7 +61,7 @@ sudo apt-get install qemu-user-static qemu-system qemu-utils qemu-system-misc bi
 
 On Fedora, install with `dnf install qemu`.
 
-I recommend building Qemu from source.
+I recommend building Qemu from source. After building, register Qemu with binfmt to be able to run foreign architectures emulated on your platform with `sudo ./scripts/qemu-binfmt-conf.sh`.
 
 Currently there are three distributions of PPC64le VMs pre-packaged for Qemu:
 
