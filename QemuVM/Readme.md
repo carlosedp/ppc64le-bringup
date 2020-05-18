@@ -249,11 +249,23 @@ done
 ports=$ports"hostfwd=tcp::$LocalSSHPort-:22"
 ports="hostfwd=tcp::$LocalSSHPort-:22"
 
+# Accelerate if KVM is available
+ARGS=""
+if $(command -v lsmod > /dev/null); then
+  if [ $(uname -m) == "ppc64le" ]; then
+    sudo modprobe kvm
+    sudo modprobe kvm-hv
+    ARGS="-enable-kvm -machine cap-ccf-assist=off"
+  fi
+fi
+
 qemu-system-ppc64 \
     -M pseries -cpu POWER9 -smp cores=4,threads=1 -m 4G \
+    $ARGS \
     -display none -nographic -nodefaults -serial mon:stdio  \
     -drive file=ppc64le-QemuVM.qcow2,format=qcow2,if=virtio \
     -netdev user,id=network01,$ports -device virtio-net-pci,netdev=network01
+
 EOF
 
 # Create start script
