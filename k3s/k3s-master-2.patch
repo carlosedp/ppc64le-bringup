@@ -1,0 +1,216 @@
+diff --git a/Dockerfile.dapper b/Dockerfile.dapper
+index 441611d6..6736821c 100644
+--- a/Dockerfile.dapper
++++ b/Dockerfile.dapper
+@@ -9,19 +9,23 @@ ENV no_proxy=$no_proxy
+ 
+ RUN apk -U --no-cache add bash git gcc musl-dev docker vim less file curl wget ca-certificates jq linux-headers zlib-dev tar zip squashfs-tools npm coreutils \
+     python2 openssl-dev libffi-dev libseccomp libseccomp-dev make libuv-static sqlite-dev sqlite-static libselinux libselinux-dev zlib-dev zlib-static
+-RUN if [ "$(go env GOARCH)" = "arm64" ]; then                                                               \
+-    wget https://github.com/aquasecurity/trivy/releases/download/v0.11.0/trivy_0.11.0_Linux-ARM64.tar.gz && \
+-    tar -zxvf trivy_0.11.0_Linux-ARM64.tar.gz                                                            && \
+-    mv trivy /usr/local/bin;                                                                                \
+-    elif [ "$(go env GOARCH)" = "arm" ]; then                                                               \
+-    wget https://github.com/aquasecurity/trivy/releases/download/v0.11.0/trivy_0.11.0_Linux-ARM.tar.gz   && \
+-    tar -zxvf trivy_0.11.0_Linux-ARM.tar.gz                                                              && \
+-    mv trivy /usr/local/bin;                                                                                \
+-    else                                                                                                    \
+-    wget https://github.com/aquasecurity/trivy/releases/download/v0.11.0/trivy_0.11.0_Linux-64bit.tar.gz && \
+-    tar -zxvf trivy_0.11.0_Linux-64bit.tar.gz                                                            && \
+-    mv trivy /usr/local/bin;                                                                                \
+-    fi
++ RUN if [ "$(go env GOARCH)" = "arm64" ]; then                                                                    \
++     wget https://github.com/aquasecurity/trivy/releases/download/v0.11.0/trivy_0.11.0_Linux-ARM64.tar.gz      && \
++     tar -zxvf trivy_0.11.0_Linux-ARM64.tar.gz                                                                 && \
++     mv trivy /usr/local/bin;                                                                                     \
++     elif [ "$(go env GOARCH)" = "arm" ]; then                                                                    \
++     wget https://github.com/aquasecurity/trivy/releases/download/v0.11.0/trivy_0.11.0_Linux-ARM.tar.gz        && \
++     tar -zxvf trivy_0.11.0_Linux-ARM.tar.gz                                                                   && \
++     mv trivy /usr/local/bin;                                                                                     \
++     elif [ "$(go env GOARCH)" = "ppc64le" ]; then                                                                \
++     wget https://github.com/carlosedp/ppc64-bringup/releases/download/v1.0/trivy_0.11.0_Linux-PPC64LE.tar.gz  && \
++     tar -zxvf trivy_0.11.0_Linux-PPC64LE.tar.gz                                                               && \
++     mv trivy /usr/local/bin;                                                                                     \
++     else                                                                                                         \
++     wget https://github.com/aquasecurity/trivy/releases/download/v0.11.0/trivy_0.11.0_Linux-64bit.tar.gz      && \
++     tar -zxvf trivy_0.11.0_Linux-64bit.tar.gz                                                                 && \
++     mv trivy /usr/local/bin;                                                                                     \
++     fi
+ RUN trivy --download-db-only
+ RUN mkdir -p /go/src/golang.org/x && \
+     cd /go/src/golang.org/x && git clone https://github.com/golang/tools && cd tools && \
+diff --git a/install.sh b/install.sh
+index a35fa974..51a1fecd 100755
+--- a/install.sh
++++ b/install.sh
+@@ -299,6 +299,10 @@ setup_verify_arch() {
+             ARCH=arm
+             SUFFIX=-${ARCH}hf
+             ;;
++        ppc64le)
++            ARCH=ppc64le
++            SUFFIX=
++            ;;
+         *)
+             fatal "Unsupported architecture $ARCH"
+     esac
+diff --git a/manifests/local-storage.yaml b/manifests/local-storage.yaml
+index bbec8e35..48a89b97 100644
+--- a/manifests/local-storage.yaml
++++ b/manifests/local-storage.yaml
+@@ -59,7 +59,7 @@ spec:
+             effect: "NoSchedule"
+       containers:
+       - name: local-path-provisioner
+-        image: rancher/local-path-provisioner:v0.0.14
++        image: carlosedp/local-path-provisioner:v0.0.14
+         imagePullPolicy: IfNotPresent
+         command:
+         - local-path-provisioner
+@@ -75,7 +75,7 @@ spec:
+             fieldRef:
+               fieldPath: metadata.namespace
+         - name: HELPER_IMAGE
+-          value: rancher/library-busybox:1.31.1
++          value: busybox:1.31.1
+       volumes:
+         - name: config-volume
+           configMap:
+diff --git a/manifests/metrics-server/metrics-server-deployment.yaml b/manifests/metrics-server/metrics-server-deployment.yaml
+index e36a128e..bb0707a4 100644
+--- a/manifests/metrics-server/metrics-server-deployment.yaml
++++ b/manifests/metrics-server/metrics-server-deployment.yaml
+@@ -35,7 +35,7 @@ spec:
+         emptyDir: {}
+       containers:
+       - name: metrics-server
+-        image: rancher/metrics-server:v0.3.6
++        image: carlosedp/metrics-server:v0.3.6
+         volumeMounts:
+         - name: tmp-dir
+           mountPath: /tmp
+diff --git a/manifests/traefik.yaml b/manifests/traefik.yaml
+index 89b63b5d..6bf71101 100644
+--- a/manifests/traefik.yaml
++++ b/manifests/traefik.yaml
+@@ -16,7 +16,7 @@ spec:
+     kubernetes:
+       ingressEndpoint:
+         useDefaultPublishedService: true
+-    image: "rancher/library-traefik"
++    image: "carlosedp/traefik:v1.7"
+     tolerations:
+       - key: "CriticalAddonsOnly"
+         operator: "Exists"
+diff --git a/package/rpm/install.sh b/package/rpm/install.sh
+index 3e2ac541..a771e033 100755
+--- a/package/rpm/install.sh
++++ b/package/rpm/install.sh
+@@ -302,6 +302,10 @@ setup_verify_arch() {
+             ARCH=arm
+             SUFFIX=-${ARCH}hf
+             ;;
++        ppc64le)
++            ARCH=ppc64le
++            SUFFIX=
++            ;;
+         *)
+             fatal "Unsupported architecture $ARCH"
+     esac
+diff --git a/pkg/cli/cmds/agent.go b/pkg/cli/cmds/agent.go
+index c9470ce8..3eaf62cb 100644
+--- a/pkg/cli/cmds/agent.go
++++ b/pkg/cli/cmds/agent.go
+@@ -89,7 +89,7 @@ var (
+ 		Name:        "pause-image",
+ 		Usage:       "(agent/runtime) Customized pause image for containerd or docker sandbox",
+ 		Destination: &AgentConfig.PauseImage,
+-		Value:       "docker.io/rancher/pause:3.1",
++		Value:       "docker.io/carlosedp/pause:3.1",
+ 	}
+ 	SnapshotterFlag = cli.StringFlag{
+ 		Name:        "snapshotter",
+diff --git a/pkg/servicelb/controller.go b/pkg/servicelb/controller.go
+index 0bad0c04..755dfb5f 100644
+--- a/pkg/servicelb/controller.go
++++ b/pkg/servicelb/controller.go
+@@ -34,7 +34,7 @@ var (
+ )
+ 
+ const (
+-	image = "rancher/klipper-lb:v0.1.2"
++	image = "carlosedp/klipper-lb:v0.1.2"
+ 	Ready = condition.Cond("Ready")
+ )
+ 
+diff --git a/scripts/airgap/image-list.txt b/scripts/airgap/image-list.txt
+index 829df1e4..b729ff43 100644
+--- a/scripts/airgap/image-list.txt
++++ b/scripts/airgap/image-list.txt
+@@ -1,8 +1,8 @@
+ docker.io/rancher/coredns-coredns:1.6.9
+-docker.io/rancher/klipper-helm:v0.3.0
+-docker.io/rancher/klipper-lb:v0.1.2
+-docker.io/rancher/library-busybox:1.31.1
+-docker.io/rancher/library-traefik:1.7.19
+-docker.io/rancher/local-path-provisioner:v0.0.14
+-docker.io/rancher/metrics-server:v0.3.6
+-docker.io/rancher/pause:3.1
++docker.io/carlosedp/klipper-helm:v0.3.0
++docker.io/carlosedp/klipper-lb:v0.1.2
++docker.io/carlosedp/traefik:v1.7
++docker.io/carlosedp/local-path-provisioner:v0.0.14
++docker.io/carlosedp/metrics-server:v0.3.6
++docker.io/carlosedp/pause:3.1
++docker.io/busybox:1.31.1
+diff --git a/scripts/build b/scripts/build
+index 66416ca6..fd2ea991 100755
+--- a/scripts/build
++++ b/scripts/build
+@@ -33,6 +33,7 @@ VERSIONFLAGS="
+     -X ${VENDOR_PREFIX}${PKG_CONTAINERD}/version.Package=${PKG_RANCHER_CONTAINERD}
+     -X ${VENDOR_PREFIX}${PKG_CRICTL}/pkg/version.Version=${VERSION_CRICTL}
+ "
++GOFLAGS=-mod=vendor
+ LDFLAGS="
+     -w -s"
+ STATIC="
+diff --git a/scripts/manifest b/scripts/manifest
+index b6759a58..e66b48ed 100755
+--- a/scripts/manifest
++++ b/scripts/manifest
+@@ -14,7 +14,7 @@ DOCKER_TAG=$(echo "${DRONE_TAG}" | sed -e 's/+/-/g')
+ 
+ # export variables for drone-manifest
+ export PLUGIN_TEMPLATE="${REPO}:${DOCKER_TAG}-ARCH"
+-export PLUGIN_PLATFORMS="linux/amd64,linux/arm64,linux/arm"
++export PLUGIN_PLATFORMS="linux/amd64,linux/arm64,linux/arm,linux/ppc64le"
+ 
+ # push current version manifest tag to docker hub
+ PLUGIN_TARGET="${REPO}:${DOCKER_TAG}" drone-manifest
+diff --git a/scripts/package-rpm b/scripts/package-rpm
+index 21c99cfc..29b08114 100755
+--- a/scripts/package-rpm
++++ b/scripts/package-rpm
+@@ -27,6 +27,8 @@ if [ ${ARCH} = aarch64 ] || [ ${ARCH} = arm64 ]; then
+     BIN_SUFFIX="-arm64"
+ elif [ ${ARCH} = armv7l ] || [ ${ARCH} = arm ]; then
+     BIN_SUFFIX="-armhf"
++elif [ ${ARCH} = ppc64le ]; then
++    BIN_SUFFIX="-ppc64le"
+ fi
+ 
+ # capture version of k3s
+diff --git a/vendor/github.com/rancher/helm-controller/pkg/helm/controller.go b/vendor/github.com/rancher/helm-controller/pkg/helm/controller.go
+index dd72aa93..af90a6a5 100644
+--- a/vendor/github.com/rancher/helm-controller/pkg/helm/controller.go
++++ b/vendor/github.com/rancher/helm-controller/pkg/helm/controller.go
+@@ -39,7 +39,7 @@ type Controller struct {
+ }
+ 
+ const (
+-	DefaultJobImage = "rancher/klipper-helm:v0.3.0"
++	DefaultJobImage = "carlosedp/klipper-helm:v0.3.0"
+ 	Label           = "helmcharts.helm.cattle.io/chart"
+ 	Annotation      = "helmcharts.helm.cattle.io/configHash"
+ 	CRDName         = "helmcharts.helm.cattle.io"

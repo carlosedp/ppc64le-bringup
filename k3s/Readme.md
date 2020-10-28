@@ -143,7 +143,7 @@ wget https://github.com/carlosedp/ppc64-bringup/releases/download/v1.0/k3s-maste
 patch --ignore-whitespace << k3s-master.patch
 ```
 
-After this, run `./scripts/download && ./scripts/build && ./scripts/package-cli` on a `ppc64le` host and you will have the binaries at the `dist` dir.
+After this, run `mkdir -p build/data && ./scripts/download && go generate` on a `ppc64le` host, then build binary with `SKIP_VALIDATE=true make` and you will have the binaries at the `dist` dir.
 
 ## Misc
 
@@ -172,9 +172,6 @@ sudo rm -rf /var/lib/kubelet
 sudo rm -rf /var/lib/rancher
 sudo rm -rf /etc/rancher/k3s
 
-sudo iptables -P INPUT ACCEPT
-sudo iptables -P FORWARD ACCEPT
-sudo iptables -P OUTPUT ACCEPT
-sudo iptables -F
+iptables-save | grep -v KUBE- | grep -v CNI- | iptables-restore
 ```
 

@@ -195,25 +195,17 @@ index f9d4eff..cd9da5b 100644
 +docker.io/carlosedp/metrics-server:v0.3.6
 +docker.io/carlosedp/pause:3.1
 diff --git a/scripts/build b/scripts/build
-index 4ca6333..0b9c0c0 100755
+index 4ca6333..26a4062 100755
 --- a/scripts/build
 +++ b/scripts/build
-@@ -100,13 +100,13 @@ if [ ! -x ${INSTALLBIN}/cni ]; then
-     WORKDIR=$TMPDIR/src/github.com/containernetworking/plugins
-     git clone -b $VERSION_CNIPLUGINS https://github.com/rancher/plugins.git $WORKDIR
-     cd $WORKDIR
--    GOPATH=$TMPDIR CGO_ENABLED=0 "${GO}" build -tags "$TAGS" -ldflags "$LDFLAGS $STATIC" -o $INSTALLBIN/cni
-+    GOPATH=$TMPDIR CGO_ENABLED=0 "${GO}" build -mod=vendor -tags "$TAGS" -ldflags "$LDFLAGS $STATIC" -o $INSTALLBIN/cni
- )
- fi
- # echo Building agent
- # CGO_ENABLED=1 "${GO}" build -tags "$TAGS" -ldflags "$VERSIONFLAGS $LDFLAGS $STATIC" -o bin/k3s-agent ./cmd/agent/main.go
- echo Building server
--CGO_ENABLED=1 "${GO}" build -tags "$TAGS" -ldflags "$VERSIONFLAGS $LDFLAGS $STATIC_SQLITE" -o bin/containerd ./cmd/server/main.go
-+CGO_ENABLED=1 "${GO}" build -mod=vendor -tags "$TAGS" -ldflags "$VERSIONFLAGS $LDFLAGS $STATIC_SQLITE" -o bin/containerd ./cmd/server/main.go
- ln -s containerd ./bin/k3s-agent
- ln -s containerd ./bin/k3s-server
- ln -s containerd ./bin/kubectl
+@@ -35,6 +35,7 @@ VERSIONFLAGS="
+ "
+ LDFLAGS="
+     -w -s"
++GOFLAGS=-mod=vendor
+ STATIC="
+     -extldflags '-static'
+ "
 diff --git a/scripts/download b/scripts/download
 index 3faf0a2..524a2d6 100755
 --- a/scripts/download

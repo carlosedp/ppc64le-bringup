@@ -16,6 +16,8 @@ There is also a [guide](https://github.com/carlosedp/ppc64-bringup/tree/master/Q
 * [Drone-CI CLI](#drone-ci-cli)
 * [Kubernetes Dashboard](#kubernetes-dashboard)
 * [Minio](#minio)
+* [Grafana Loki](#grafana-loki)
+* [Aquasecurity Trivy](#aquasecurity-trivy)
 
 ---------------------------------------------------
 
@@ -54,32 +56,48 @@ The [guide](k3s/Readme.md#building-from-source) also provides the process to bui
 
 **Dependencies:**
 
-* [ ] Add arch to [dqlite-builder](https://github.com/rancher/dqlite-build) - [PR#12](https://github.com/rancher/dqlite-build/pull/12)
 * [x] Add arch to [k3s-root](https://github.com/rancher/k3s-root) - [PR#7](https://github.com/rancher/k3s-root/pull/7)
-* [ ] Fix dapper download on K3s Makefile
-* [ ] Add klipper-helm image support or overrire it on Go module.
+* [ ] Add ppc64le trivy scanner download on Dockerfile.dapper
 
 **Required `ppc64le` images:**
 
 * [x] `rancher/coredns-coredns:1.6.3`
-* [ ] `rancher/klipper-helm:v0.2.3` - [PR#13](https://github.com/rancher/klipper-helm/pull/13)
+* [ ] `rancher/klipper-helm:v0.3.0` - [PR#13](https://github.com/rancher/klipper-helm/pull/13)
 * [ ] `rancher/klipper-lb:v0.1.2` - []()
 * [ ] `rancher/library-traefik:1.7.19` - []()
-* [ ] `rancher/local-path-provisioner:v0.0.11` - []()
+* [ ] `rancher/local-path-provisioner:v0.0.14` - []()
+* [ ] `rancher/library-busybox:1.31.1` - []()
 * [ ] `rancher/pause:3.1` - []()
+
+Replace images:
+
+    scripts/airgap/image-list.txt
+    vendor/github.com/rancher/helm-controller/pkg/helm/controller.go
+    42:     DefaultJobImage = "rancher/klipper-helm:v0.3.0"
+    pkg/servicelb/controller.go
+    37:     image = "rancher/klipper-lb:v0.1.2"
+    manifests/local-storage.yaml
+    78:          value: rancher/library-busybox:1.31.1
+    manifests/traefik.yaml
+    19:    image: "rancher/library-traefik"
+    manifests/local-storage.yaml
+    62:        image: rancher/local-path-provisioner:v0.0.14
+    manifests/metrics-server/metrics-server-deployment.yaml
+    38:        image: rancher/metrics-server:v0.3.6
+    pkg/cli/cmds/agent.go
+    92:             Value:       "docker.io/rancher/pause:3.1",
 
 **Temporary Images:**
 
 All these images are multi-arch for `amd64`, `arm`, `arm64` and `ppc64le`.
 
 * [`carlosedp/pause:3.1`](https://hub.docker.com/r/carlosedp/pause)
-* [`carlosedp/local-path-provisioner:v0.0.12`](https://hub.docker.com/r/carlosedp/local-path-provisioner)
-* [`carlosedp/klipper-helm:v0.2.3`](https://hub.docker.com/r/carlosedp/klipper-helm)
+* [`carlosedp/local-path-provisioner:v0.0.14`](https://hub.docker.com/r/carlosedp/local-path-provisioner)
+* [`carlosedp/klipper-helm:v0.3.0`](https://hub.docker.com/r/carlosedp/klipper-helm)
 * [`carlosedp/klipper-lb:v0.1.2`](https://hub.docker.com/r/carlosedp/klipper-lb)
-* [`carlosedp/traefik:v2.2.0`](https://hub.docker.com/r/carlosedp/traefik)
 * [`carlosedp/traefik:v1.7`](https://hub.docker.com/r/carlosedp/traefik)
 * [`carlosedp/metrics-server:v0.3.6`](https://hub.docker.com/r/carlosedp/metrics-server)
-* [`coredns/coredns:1.6.3`](https://hub.docker.com/r/coredns/coredns:1.6.3)
+* [`coredns/coredns:1.6.9`](https://hub.docker.com/r/coredns/coredns:1.6.9)
 
 ---------------------------------------------------
 
@@ -87,7 +105,7 @@ All these images are multi-arch for `amd64`, `arm`, `arm64` and `ppc64le`.
 
 Add `ppc64le` images to CI:
 
-* [ ] `prometheus` - [PR#7067](https://github.com/prometheus/prometheus/pull/7067)
+* [x] `prometheus` - [PR#7067](https://github.com/prometheus/prometheus/pull/7067)
 * [x] `alertmanager` - [PR#2219](https://github.com/prometheus/alertmanager/pull/2219)
 * [x] `node-exporter` - Already supports `ppc64le`
 * [x] `snmp-exporter` - [PR#494](https://github.com/prometheus/snmp_exporter/pull/494)
@@ -104,7 +122,7 @@ Add `ppc64le` images to CI:
 
 ## Traefik Image
 
-* [ ] traefik - [PR#]()
+* [ ] traefik v1.7 - [PR#]()
 
 ---------------------------------------------------
 
@@ -136,3 +154,17 @@ The multiarch images for Minio and Minio client can be pulled from my DockerHub 
 * [ ] Add multiarch images - [Issue#9546](https://github.com/minio/minio/issues/9546)
 
 ---------------------------------------------------
+
+## Grafana Loki
+
+Loki is like Prometheus, but for logs.
+
+* [x] Add support for building binaries for ppc64le arch [PR#2813](https://github.com/grafana/loki/pull/2813#issuecomment-716773195)
+
+---------------------------------------------------
+
+## Aquasecurity Trivy
+
+Container vulnerability scanner
+
+* [x] Add support to trivy <https://github.com/aquasecurity/trivy> [PR#724](https://github.com/aquasecurity/trivy/pull/724)

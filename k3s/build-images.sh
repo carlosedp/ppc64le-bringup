@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -xe
+
 REPO=carlosedp
 TMPPATH=$HOME
 
@@ -7,22 +9,22 @@ TMPPATH=$HOME
 # Build Images
 ##############
 
-mkdir $HOME/k3s-images
+mkdir -p $HOME/k3s-images
 pushd $HOME/k3s-images
 
 ####
 ## klipper-helm
 ####
 
-git clone https:////github.com/rancher/klipper-helm
+git clone https://github.com/rancher/klipper-helm
 pushd klipper-helm
-KLIPPERVERSION=v0.2.3
+KLIPPERVERSION=v0.3.0
 #or
 #KLIPPERVERSION=`git tag | tail -1` # build last tagged version
 
 git checkout $KLIPPERVERSION
 
-patch --ignore-whitespace << 'EOF'
+patch -p1 --ignore-whitespace << 'EOF'
 diff --git a/package/Dockerfile b/package/Dockerfile
 index 7cbf2cb..49030b4 100644
 --- a/package/Dockerfile
@@ -45,7 +47,7 @@ popd
 ## klipper-lb
 ####
 
-git clone https:////github.com/rancher/klipper-lb
+git clone https://github.com/rancher/klipper-lb
 pushd klipper-lb
 KLIPPERLBVERSION=v0.1.2
 
@@ -138,9 +140,9 @@ popd
 ## local-path-provisioner
 ####
 
-git clone https:////github.com/rancher/local-path-provisioner
+git clone https://github.com/rancher/local-path-provisioner
 pushd local-path-provisioner
-LPPVERSION=v0.2.3
+LPPVERSION=v0.0.14
 git checkout $LPPVERSION
 
 for ARCH in amd64 arm64 arm ppc64le riscv64;
@@ -152,7 +154,7 @@ done
 cat > Dockerfile.simple <<EOF
 FROM scratch
 ARG TARGETARCH
-COPY bin/local-path-provisioner-$TARGETARCH /usr/bin/local-path-provisioner
+COPY bin/local-path-provisioner-\$TARGETARCH /usr/bin/local-path-provisioner
 CMD ["local-path-provisioner"]
 EOF
 
@@ -175,6 +177,7 @@ done
 docker manifest create --amend $IMAGE:$VERSION `echo $ARCHITECTURES | sed -e "s~[^ ]*~$IMAGE:$VERSION\-&~g"`
 for arch in $ARCHITECTURES; do docker manifest annotate --arch $arch $IMAGE:$VERSION $IMAGE:$VERSION-$arch; done
 docker manifest push --purge $IMAGE:$VERSION
+
 
 ##############
 # Finish
