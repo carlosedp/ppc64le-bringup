@@ -1,6 +1,6 @@
-# PPC64 project tracker and bring-up  <!-- omit in toc -->
+# PPC64/PPC64le project tracker and bring-up  <!-- omit in toc -->
 
-The objective of this repository is to track the progress and pre-requisites to bring new applications and projects to PPC64le architecture.
+The objective of this repository is to track the progress and pre-requisites to bring new applications and projects to PPC64 and PPC64le architecture. The bigger focus is on little-endian but big-endian could also be added.
 
 If you want to start developing and run a PPC64le Virtual Machine, I've uploaded both Debian and Ubuntu versions that can be downloaded from the [releases](https://github.com/carlosedp/ppc64-bringup/releases/tag/v1.0) section.
 
@@ -23,21 +23,9 @@ There is also a [guide](https://github.com/carlosedp/ppc64-bringup/tree/master/Q
 
 ## Docker Community Edition
 
-Until there is an official package,I've built a `.deb` and tarball packages available in [releases](https://github.com/carlosedp/ppc64-bringup/releases/). All pre-requisites are already bundled in (containerd, runc, dockerd and docker-cli).
+Until there is an official package,I've built `.deb` and `.rpm` packages available in [releases](https://github.com/carlosedp/ppc64-bringup/releases/). All pre-requisites are already bundled in (containerd, runc, dockerd and docker-cli).
 
-```sh
-# Download the package for Debian/Ubuntu
-wget https://github.com/carlosedp/ppc64-bringup/releases/download/v1.0/docker-19.03.8_ppc64el.deb
-
-# or for other distros
-wget https://github.com/carlosedp/ppc64-bringup/releases/download/v1.0/docker-19.03.8_ppc64el.tar.gz
-
-# Install for Debian/Ubuntu
-sudo apt install ./docker-master-dev_ppc64el.deb
-
-# or other distros
-sudo tar vxf docker-master-dev_ppc64el.tar.gz -C /
-```
+Unpack the `.tar.gz` file and install the packages with the distro tool (apt or yum).
 
 * [ ] Add Debian packages for ppc64el to [docker-ce-packaging](https://github.com/docker/docker-ce-packaging) repo -
 * [ ] Add ppc64le to containerd-packaging repo - [Issue#164](https://github.com/docker/containerd-packaging/issues/164)
@@ -151,7 +139,7 @@ The multiarch images for Minio and Minio client can be pulled from my DockerHub 
 * [`carlosedp/minio:latest`](https://hub.docker.com/r/carlosedp/minio)
 * [`carlosedp/minio-mc:latest`](https://hub.docker.com/r/carlosedp/minio-mc)
 
-* [ ] Add multiarch images - [Issue#9546](https://github.com/minio/minio/issues/9546)
+* [x] Add multiarch images - [Issue#9546](https://github.com/minio/minio/issues/9546)
 
 ---------------------------------------------------
 
